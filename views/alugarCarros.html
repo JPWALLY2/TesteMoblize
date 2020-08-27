@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>MobCar - Alugar Carros</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- importando o arquivo css do Bootstrap --> 
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+ </head>
+ <body>
+ 	 <h3 class="text-center text-uppercase mt-3">Calcular Aluguel</h3>
+ 	 <div class="container nav justify-content-end">
+   <a href="/infoCarros" class="btn btn-primary mb-3">Voltar</a>
+   </div>
+
+    <div class="container col-lg-10 col-9 bg-light rounded">
+      <div class="container row text-center">
+        <div class="col-4 mt-5">
+        <h4>Marca: <small class="text-uppercase">Chevrolet</small></h4>
+        </div>
+         <div class="col-4 mt-5">
+        <h4>Categoria: <small class="text-uppercase">Padrão</small></h4>
+        </div>
+         <div class="col-4 mt-5">
+        <h4>Valor Diário: <small class="text-uppercase" name="valorD" value="99,99">R$ 99,99</small></h4>
+        </div>
+      </div>
+
+      	<form>
+      		<div class="container row text-center">
+				<div class="col-8 mt-3">
+					<h4>Dia do aluguel <small><input type="date" name="dias" class="col-6" ></small></h4>
+				</div>
+				<div class="col-4 mt-3">
+					<h4>Número de Dias <small><input type="number" name="dias" class=" col-4" min="1"></small></h4>
+				</div>
+      		</div>
+      		<div class="container row text-center">
+      			<div class="col-6 mt-3">
+					<h4>Total a Pagar <small><input type="number" name="valorTotal" disabled="true" class=" col-4" value=""></small></h4>
+				</div>
+      		</div>
+      		
+
+        </form>
+     
+      <div class=" col-12 mt-3 pb-5">
+        <a href="/resCarros" class="btn btn-success float-right px-5 text-uppercase">Reservar</a>
+      </div>
+   </div>
+ </body>
+ </html>
+
+<!-- importando o arquivo js do Bootstrap -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+
+<script>
+	$(document).ready(function(){
+
+		 $("input").change(function(){
+		 	//pega o numero do input dias
+		 	dias = parseInt($("input[name=dias]").val());
+		 	//pega o valor do aluguel
+		 	valorV = $("input[name=valorD]").val();
+		 	//troca a , por .
+		 	valorP = valorV.replace(",", ".");
+		 	//troca o . por ""
+		 	valorP1 = valorP.replace(".", "");
+		 	//multiplica os dias pelo valor
+		 	valorT = (dias * valorP1);
+		 	//formata o valor total e colocar em uma constante
+		 	const format = valorT.toLocaleString();
+		 	//mostrar o resultado no input name=valorTotal
+    		$("input[name=valorTotal]").val(format);
+
+		 }
+	}
+</script>
