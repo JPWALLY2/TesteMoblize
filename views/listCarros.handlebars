@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>MobCar - Lista de Carros</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+ </head>
+ <body>
+
+    {{#if success_msg}}
+      <div class="alert alert-success text-center">{{success_msg}}</div>
+    {{/if}}
+    {{#if error_msg}}
+      <div class="alert alert-success text-center">{{error_msg}}</div>
+    {{/if}}
+
+      <h3 class="text-center text-uppercase my-3">Listagem de Carros</h3>
+      <a href="" class="btn btn-warning float-right ml-3 my-3" style="margin-right: 105px">Pesquisar</a>
+    <input class="form-control col-3 float-right my-3" type="text" name="pesquisa" placeholder="Pesquisar">
+
+  
+  <table class="table col-10 mx-auto">
+  <thead class="thead-light">
+    <tr class="text-center">
+      <th>Modelo</th>
+      <th>Categoria</th>
+      <th></th>
+
+    </tr>
+  </thead>
+  <tbody>
+{{#each carros}}
+    <tr class="text-center">
+      <td>{{modelo}}</td>
+      <td>{{categoria}}</td>
+       <td><a href="/infoCarros/{{_id}}" class="btn btn-info" title="Mais Informações"> M.I.</a></td>
+{{else}}
+        <th class="text-center" colspan="10"> Nenhum carro registrada</th>
+{{/each}}
+    </tr>
+  </tbody>
+</table>
+ </body>
+ </html>
+
+ <script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>

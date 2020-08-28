@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <title>MobCar - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- importando o arquivo css do Bootstrap --> 
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+	 {{#if success_msg}}
+      <div class="alert alert-success text-center">{{success_msg}}</div>
+    {{/if}}
+    {{#if error_msg}}
+      <div class="alert alert-success text-center">{{error_msg}}</div>
+    {{/if}}
+
+	<div class="container col-lg-4 col-6 bg-light mt-5 rounded">
+		<h3 class="text-center text-uppercase mt-2">Login</h3>
+		<hr>
+	<form>
+	  <div class="form-group">
+	    <label for="email">Email</label>
+	    <input type="text" class="form-control" id="email" placeholder="Seu email" required="required">
+	  </div>
+	  <div class="form-group">
+	    <label for="senha">Senha</label>
+	    <input type="text" class="form-control" id="senha" placeholder="Senha" required="required">
+	  </div>
+	  <div class="form-group">
+	  	<div align="center">
+	    <a href="cadClientes">Cadastar</a>
+	  </div>
+	</div>
+	  <div align="center">
+	  <a href="#" type="submit" class="btn btn-primary mb-3 px-5">Enviar</a>
+	</div>
+	</form>
+	</div>
+</body>
+</html>
+
+<!-- importando o arquivo js do Bootstrap -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>

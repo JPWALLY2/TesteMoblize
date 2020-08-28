@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>MobCar - Cadastro de Clientes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <!-- importando o arquivo CSS do Bootstrap -->
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <style>
+  	@media only screen and (max-width: 576px)  {
+  		h3{
+  			font-size: 20px;
+  		}
+  	}
+  </style>
+ </head>
+ <body>
+
+ 	{{#each erros}}
+ 	<div class="alert alert-danger text-center mb-0">{{texto}}</div>
+
+ 	{{else}}
+
+ 	{{/each}}
+ 	<div class="container col-lg-4 col-6 bg-light mt-2  rounded">
+		<h3 class="text-center text-uppercase mt-2">Cadastro de Clientes</h3>
+		<hr>
+	<form method="POST" action="/cadClientes/novo">
+		<div class="form-group">
+	    <label for="nome">Nome</label>
+	    <input type="text" class="form-control" name="nome" id="nome" placeholder="Seu nome" required="required">
+	  </div>
+	  <div class="form-group">
+	    <label for="telefone">Telefone</label>
+	    <input type="text" class="form-control" name="telefone" id="telefone" placeholder="Seu Telefone" required="required">
+	  </div>
+	  <div class="row">
+	  	<div class="col">
+	  <div class="form-group">
+	    <label for="dataNasc">Data de Nascimento</label>
+	    <input type="date" class="form-control" name="dataNasc" id="dataNasc" placeholder="Sua Data de Nascimento" required="required">
+	  </div>
+	  </div>
+	  <div class="col">
+	   <div class="form-group">
+	    <label for="cpf">CPF</label>
+	    <input type="text" class="form-control" name="cpf" id="cpf" placeholder="Seu CPF" required="required">
+	  </div>
+	</div>
+	</div>
+	<div class="form-group">
+	    <label for="email">Email</label>
+	    <input type="text" class="form-control" name="email" id="email" placeholder="Seu Email" required="required">
+	  </div>
+	  <div class="form-group">
+	    <label for="senha">Senha</label>
+	    <input type="password" class="form-control" name="senha" id="senha" placeholder="Sua Senha" required="required">
+	  </div>
+	  <div class="form-group">
+	  	<div align="center">
+	    <a href="/">Login</a>
+	  </div>
+	</div>
+	  <div align="center">
+	  <button type="submit" class="btn btn-primary mb-3 px-5">Enviar</button>
+	</div>
+	</form>
+	</div>
+
+ </body>
+</html>
+
+<!-- importando o arquivo js do Bootstrap -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- /inportanda o jquery via CDN para usar a lib da mascara -->
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+<!-- lib da mascara -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.12/jquery.mask.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.12/jquery.mask.min.js"></script>
+
+<script>
+//Mascara CPF
+$(document).ready(function(){
+  $('#cpf').mask('000.000.000-00');
+//Mascara telefone
+  $('#telefone').mask('(00) 00000-0000');
+});
+</script>  

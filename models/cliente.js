@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 //definindo o model cliente
-const ClienteSchema = mongoose.Schema({
+const Cliente = new Schema({
 	nome:{
 		type: String,
 		require: true
@@ -35,4 +35,4 @@ const ClienteSchema = mongoose.Schema({
 
 });
 //conectando a model ClienteSchema a collection clientes
-mongoose.model('clientes', 	ClienteSchema);
+mongoose.model('Clientes', 	Cliente);

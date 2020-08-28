@@ -1,322 +1,182 @@
-//constante que armazena o express
-const express = require ('express');
-const app = express();
+//CARREGANDO MÓDULOS
+	//constante que armazena o express
+	const express = require ('express');
+	//const que recebe a fução do express
+	const app = express();
+	//constante que armazena o body-parser
+	const bodyParser = require ('body-parser');
+	//constante que armazena o handlebars
+	const handlebars = require('express-handlebars');
+	//constante que armazena o mongoose
+	const mongoose = require('mongoose');
+	//constante que armazena o express-session
+	const session = require('express-session');
+	//constante que armazena o connect-flash
+	const flash = require('connect-flash');
+	//chamar o model cliente
+	require('./models/cliente');
+	//chama a função que passa uma referencia do model para uma const
+	const Cliente = mongoose.model('Clientes');
+	//chamar o model carro
+	require('./models/carro');
+	//chama a função que passa uma referencia do model para uma const
+	const Carro = mongoose.model('Carros');
 
-//chama o arquivo model
-// require("../models/carro");
-//chama a função (mongoose.model("Carros")) q vai passar uma referencia do model para a const
-// const Usuario = mongoose.model("Carros");
-
-//constante que armazena o mongoose
-const mongoose = require('mongoose');
-
-//redireciona o bootstrap js
-app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
-//redireciona o bootstrap css
-app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
-
-//CONFIGURANDO O MONGOOSE
-//para evitar alguns erros mongoose
-mongoose.Promise = global.Promise;
-
-//conectando ao mongoose, e informando qual banco de dados utilizar
-mongoose.connect("mongodb://localhost/testeMobilize", { 
-	useNewUrlParser:true,  useUnifiedTopology: true
-}).then(() => {
-	console.log('MongoDB Conectado...');
-}).catch((err) =>{
-	console.log('Ouve um erro ao conectar ao MongoDB: ' + err);
-});
+	//redireciona o bootstrap js
+	app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
+	//redireciona o bootstrap css
+	app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
 
 
-const PORT = 8080;
-	app.listen(PORT, () => {
-	    console.log("Servidor Rodando na porta 8080! ");
+//CONFIGURAÇÕES
+
+	//session
+	app.use(session({
+		//cria uma seção
+		secret: 'secaotestemoblize',
+		resave: true,
+		saveUninitialized: true
+	}));
+
+	//body-parser
+	app.use(bodyParser.urlencoded({extended: true}));
+	app.use(bodyParser.json());
+
+	//handlebar
+	app.engine('handlebars', handlebars({defaultLayout:''}));
+	app.set('view engine', 'handlebars');
+
+	//flash
+	app.use(flash());
+
+	//middleware
+	app.use((req, res , next) => {
+		//variaveis globais
+		//msg global de sucesso
+		res.locals.success_msg = req.flash('success_msg');
+		//msg global de erro
+		res.locals.error_msg = req.flash('error_msg');
+		next();
+	})
+
+	//mongoose
+	//para evitar alguns erros mongoose
+	mongoose.Promise = global.Promise;
+	//conectando ao mongoose, e informando qual banco de dados utilizar
+	mongoose.connect("mongodb://localhost/testeMoblize", { 
+		useNewUrlParser:true,  useUnifiedTopology: true
+	}).then(() => {
+		console.log('MongoDB Conectado...');
+	}).catch((err) =>{
+		console.log('Ouve um erro ao conectar ao MongoDB: ' + err);
 	});
-	
-app.get('/', function(req, res){
-	res.sendFile(__dirname + '/views/login.html');
-});
 
-// app.get('/cadClientes', function(req, res){
-// 	res.sendFile(__dirname + '/views/cadClientes.html');
-// });
+//ROTAS
 
-app.get('/listCarros', function(req, res){
-	res.sendFile(__dirname + '/views/listCarros.html');
-});
+// ROTA DE LOGIN
+	app.get('/',(req, res) => {
+		 res.render('login');
+	}); 
 
-// app.get('/infoCarros', function(req, res){
-// 	res.sendFile(__dirname + '/views/infoCarros.html');
-// });
+	//ROTA DE LISTA DE CARROS
+	app.get('/listCarros', (req, res) => {
+		Carro.find().lean().then((carros) => {
+			res.render('listCarros', {carros: carros});
+		}).catch((err) => {
+			req.flash('error_msg', 'Houve um erro ao listar os carros');
+		})
+	});
 
-// app.get('/alugarCarros', function(req, res){
-// 	res.sendFile(__dirname + '/views/alugarCarros.html');
-// });
+	app.get('/infoCarros/:id', (req, res) => {
+		Carro.findOne({_id:req.params.id}).then((carros) => {
+			res.render('infoCarros', {carros: carros});
+		}).catch((err) => {
+			req.flash('error_msg', 'Houve um erro ao exibir as informações');
+				res.render('listCarros');
+		})
+	});
 
-// app.get('/resCarros', function(req, res){
-// 	res.sendFile(__dirname + '/views/resCarros.html');
-// });
+	app.get('/alugarCarros', function(req, res){
+		res.render('alugarCarros');
+	});
 
+	//ROTA DO FORMULARIO DE CLIENTES
+	app.get('/cadClientes', (req, res) =>{
+		res.render('cadClientes');
+	});
 
-//definindo a model carro
-const CarroSchema = mongoose.Schema({
-	nome:{
-		type: String,
-		require: true
-	},
-	modelo:{
-		type: String,
-		require:true
-	},
-	placa:{
-		type: String,
-		require:true
-	},
-	cor:{
-		type: String
-	},
-	observacao:{
-		type: String
-	},
-	categoria:{
-		type: String,
-		require:true
-	}
+	//ROTA DE CADASTRO DE CLIENTES
+	app.post('/cadClientes/novo', (req, res) =>{
+		//array para erros de validação
+		var erros = []
 
-});
-//conectando a model CarroSchema a collection carros
-mongoose.model('carros', CarroSchema);
+		if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null || req.body.nome == Number){
+			//armazena o erro na array
+			erros.push({texto: 'Nome inválido'});
+		}
+		if(!req.body.cpf || typeof req.body.cpf == undefined || req.body.cpf == null || req.body.cpf == String){
+			//armazena o erro na array
+			erros.push({texto: 'CPF inválido'});
+		}
+		if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
+			//armazena o erro na array
+			erros.push({texto: 'Email inválido'});
+		}
+		if(!req.body.telefone || typeof req.body.telefone == undefined || req.body.telefone == null || req.body.telefone == String){
+			//armazena o erro na array
+			erros.push({texto: 'Telefone inválido'});
+		}
+		if(!req.body.senha || typeof req.body.senha == undefined || req.body.senha == null){
+			//armazena o erro na array
+			erros.push({texto: 'Senha inválida'});
+		}
+		if(!req.body.dataNasc || typeof req.body.dataNasc == undefined || req.body.dataNasc == null){
+			//armazena o erro na array
+			erros.push({texto: 'Datade Nascimento inválida'});
+		}
 
-// armazena uma referência do CarroSchema
-const Carro01 = mongoose.model('carros');
+		if(erros.length > 0 ){
+			res.render('cadClientes', {erros: erros})
+		}else{
+			//retirar os caracteres especiais do cpf
+		const cpfT = (req.body.cpf);
+		const cpf3P = cpfT.replace("-", "");
+		const cpf1P = cpf3P.replace(".", "");
+		const cpf = cpf1P.replace(".", "");
 
-//criando um carro
-new Carro01({
-	modelo: 'Celta',
-	placa: 'IFM-5687',
-	cor: 'Roxo',
-	observacao: 'Leve arranhão na lateral dianteira',
-	categoria: 'Padrão',
-}).save().then((err) => {
-	console.log('Carro01 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro01' + err);
-});
+		//retirar os caracteres especiais do telefone
+		const telefoneT = (req.body.telefone);
+		const telefoneP1 = telefoneT.replace("-", "");
+		const telefoneP2 = telefoneP1.replace("(", "");
+		const telefoneE = telefoneP2.replace(")", "");
+		const telefone = telefoneE.replace(" ", "");
 
-// armazena uma referência do CarroSchema
-const Carro02 = mongoose.model('carros');
+		const novoCliente = {
+			nome: req.body.nome,
+			cpf: cpf,
+			email: req.body.email,
+			telefone: telefone,
+			senha: req.body.senha,
+			dataNasc: req.body.dataNasc
+		}
 
-//criando um carro
-new Carro02({
-	modelo: 'Celta',
-	placa: 'IYR-8645',
-	cor: 'Azul',
-	observacao: 'Carro com 5 anos de idade',
-	categoria: 'Padrão',
-}).save().then((err) => {
-	console.log('Carro02 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro02' + err);
-});
+		new Cliente(novoCliente).save().then(() =>{
+			req.flash('success_msg', 'Cliente cadastrado com suceso!')
+			res.redirect('/')
+		}).catch((err) => {
+			req.flash('error_msg', 'Ouve um erro ao cadastrar o cliente')
+			console.log('Erro ao salvar Cliente ' + err);
+		});
+		}
+	});
 
-// armazena uma referência do CarroSchema
-const Carro03 = mongoose.model('carros');
+//OUTROS
+	//configurando porta e servidor
+	const PORT = 8080;
+	app.listen(PORT, () => {
+		console.log("Servidor Rodando na porta 8080! ");
+	});
 
-//criando um carro
-new Carro03({
-	modelo: 'Corsa',
-	placa: 'IUT-8623',
-	cor: 'Cinza',
-	observacao: 'Pequeno amassado no para-choque',
-	categoria: 'Padrão',
-}).save().then((err) => {
-	console.log('Carro03 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro03 ' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro04 = mongoose.model('carros');
-
-//criando um carro
-new Carro04({
-	modelo: 'Corsa',
-	placa: 'ILK-8932',
-	cor: 'Prata',
-	observacao: 'Bancos dianteiros com alguns rasgos',
-	categoria: 'Padrão',
-}).save().then((err) => {
-	console.log('Carro04 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro04 ' + err);
-});
-
-
-
-// armazena uma referência do CarroSchema
-const Carro05 = mongoose.model('carros');
-
-//criando um carro
-new Carro05({
-	modelo: 'Palio',
-	placa: 'IJS-5936',
-	cor: 'Verde Escuro',
-	observacao: 'Bancos dianteiros com alguns arranhões',
-	categoria: 'Executivo',
-}).save().then((err) => {
-	console.log('Carro05 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro05 ' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro06 = mongoose.model('carros');
-
-//criando um carro
-new Carro06({
-	modelo: 'Palio',
-	placa: 'ILP-6372',
-	cor: 'Prata',
-	observacao: 'Estofado arranhado',
-	categoria: 'Executivo',
-}).save().then((err) => {
-	console.log('Carro06 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro06' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro07 = mongoose.model('carros');
-
-//criando um carro
-new Carro07({
-	modelo: 'Mobi',
-	placa: 'IOR-6314',
-	cor: 'Branco',
-	observacao: 'Vidro dianteiro levemente arranhado',
-	categoria: 'Executivo',
-}).save().then((err) => {
-	console.log('Carro07 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro07' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro08 = mongoose.model('carros');
-
-//criando um carro
-new Carro08({
-	modelo: 'Mobi',
-	placa: 'IWS-8667',
-	cor: 'Branco',
-	observacao: 'Espelho retrovisor com alguns arranhões',
-	categoria: 'Executivo',
-}).save().then((err) => {
-	console.log('Carro08 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro08' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro09 = mongoose.model('carros');
-
-//criando um carro
-new Carro09({
-	modelo: 'Logan',
-	placa: 'IRT-9635',
-	cor: 'Azul Escuro',
-	observacao: 'Ótimo Estado',
-	categoria: 'VIP',
-}).save().then((err) => {
-	console.log('Carro09 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro09' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro10 = mongoose.model('carros');
-
-//criando um carro
-new Carro10({
-	modelo: 'Logan',
-	placa: 'IOP-5476',
-	cor: 'Preto',
-	observacao: 'Ótimo Estado',
-	categoria: 'VIP',
-}).save().then((err) => {
-	console.log('Carro10 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro10' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro11 = mongoose.model('carros');
-
-//criando um carro
-new Carro11({
-	modelo: 'Hilux',
-	placa: 'ISW-8364',
-	cor: 'Vinho',
-	observacao: 'Ótimo Estado',
-	categoria: 'VIP',
-}).save().then((err) => {
-	console.log('Carro11 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro11' + err);
-});
-
-// armazena uma referência do CarroSchema
-const Carro12 = mongoose.model('carros');
-
-//criando um carro
-new Carro12({
-	modelo: 'Hilux',
-	placa: 'IXC-5736',
-	cor: 'Branco',
-	observacao: 'Ótimo Estado',
-	categoria: 'VIP',
-}).save().then((err) => {
-	console.log('Carro12 Criado');
-}).catch(() => {
-	console.log('Erro ao criar Carro12' + err);
-});
-
-
-
-
-
-//definindo o model cliente
-const ClienteSchema = mongoose.Schema({
-	nome:{
-		type: String,
-		require: true
-	},
-	cpf:{
-		type: Number,
-		require:true
-	},
-	email:{
-		type: String,
-		require:true
-	},
-	email:{
-		type: String,
-		require:true
-	},
-	telefone:{
-		type: Number,
-		require:true
-	},
-	senha:{
-		type: String,
-		require:true
-	},
-	dataNasc:{
-		type: Date,
-		require:true
-	}
-
-});
-//conectando a model ClienteSchema a collection clientes
-mongoose.model('clientes', 	ClienteSchema);
+	// app.get('/resCarros', function(req, res){
+	// 	res.sendFile(__dirname + '/views/resCarros.html');
+	// });
