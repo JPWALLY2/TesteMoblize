@@ -15,17 +15,22 @@
       <div class="alert alert-success text-center">{{error_msg}}</div>
     {{/if}}
 
+     {{#if error}}
+      <div class="alert alert-danger text-center">{{error}}</div>
+    {{/if}}
+   
+
 	<div class="container col-lg-4 col-6 bg-light mt-5 rounded">
 		<h3 class="text-center text-uppercase mt-2">Login</h3>
 		<hr>
-	<form>
+	<form method="post" action="/login">
 	  <div class="form-group">
 	    <label for="email">Email</label>
-	    <input type="text" class="form-control" id="email" placeholder="Seu email" required="required">
+	    <input type="text" class="form-control" name="email" id="email" placeholder="Seu email" required="required">
 	  </div>
 	  <div class="form-group">
 	    <label for="senha">Senha</label>
-	    <input type="text" class="form-control" id="senha" placeholder="Senha" required="required">
+	    <input type="password" class="form-control" name="senha" id="senha" placeholder="Senha" required="required">
 	  </div>
 	  <div class="form-group">
 	  	<div align="center">
@@ -33,7 +38,7 @@
 	  </div>
 	</div>
 	  <div align="center">
-	  <a href="#" type="submit" class="btn btn-primary mb-3 px-5">Enviar</a>
+	  <button type="submit" class="btn btn-primary mb-3 px-5">Enviar</button>
 	</div>
 	</form>
 	</div>

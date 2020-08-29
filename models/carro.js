@@ -29,6 +29,10 @@ const Schema = mongoose.Schema;
 		preco:{
 			type: Number,
 			require:true
+		},
+		reserva:{
+			type: Number,
+			default: 0
 		}
 
 	});

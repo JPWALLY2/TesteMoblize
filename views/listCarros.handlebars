@@ -15,10 +15,11 @@
     {{#if error_msg}}
       <div class="alert alert-success text-center">{{error_msg}}</div>
     {{/if}}
-
+    <!-- <form method="get" action="/pesquisar/{{cor}}">
       <h3 class="text-center text-uppercase my-3">Listagem de Carros</h3>
-      <a href="" class="btn btn-warning float-right ml-3 my-3" style="margin-right: 105px">Pesquisar</a>
-    <input class="form-control col-3 float-right my-3" type="text" name="pesquisa" placeholder="Pesquisar">
+      <button type="submit" class="btn btn-warning float-right ml-3 my-3" style="margin-right: 105px">Pesquisar</button>
+    <input class="form-control col-3 float-right my-3" type="text" name="cor" placeholder="Pesquisar">
+    </form> -->
 
   
   <table class="table col-10 mx-auto">
@@ -26,6 +27,7 @@
     <tr class="text-center">
       <th>Modelo</th>
       <th>Categoria</th>
+      <th></th>
       <th></th>
 
     </tr>
@@ -35,6 +37,7 @@
     <tr class="text-center">
       <td>{{modelo}}</td>
       <td>{{categoria}}</td>
+      <td></td>
        <td><a href="/infoCarros/{{_id}}" class="btn btn-info" title="Mais Informações"> M.I.</a></td>
 {{else}}
         <th class="text-center" colspan="10"> Nenhum carro registrada</th>

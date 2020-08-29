@@ -21,6 +21,12 @@
 	require('./models/carro');
 	//chama a função que passa uma referencia do model para uma const
 	const Carro = mongoose.model('Carros');
+	//constante que armazena o passport
+	const passport = require('passport');
+	//passando o arquivo de confg do auth
+	require('./config/auth')(passport)
+	//constante que armazena o bcrypt
+	const bcrypt = require('bcryptjs');
 
 	//redireciona o bootstrap js
 	app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
@@ -38,13 +44,8 @@
 		saveUninitialized: true
 	}));
 
-	//body-parser
-	app.use(bodyParser.urlencoded({extended: true}));
-	app.use(bodyParser.json());
-
-	//handlebar
-	app.engine('handlebars', handlebars({defaultLayout:''}));
-	app.set('view engine', 'handlebars');
+	app.use(passport.initialize())
+	app.use(passport.session())
 
 	//flash
 	app.use(flash());
@@ -56,8 +57,17 @@
 		res.locals.success_msg = req.flash('success_msg');
 		//msg global de erro
 		res.locals.error_msg = req.flash('error_msg');
+		res.locals.error = req.flash('error');
 		next();
 	})
+
+	//body-parser
+	app.use(bodyParser.urlencoded({extended: true}));
+	app.use(bodyParser.json());
+
+	//handlebar
+	app.engine('handlebars', handlebars({defaultLayout:''}));
+	app.set('view engine', 'handlebars');
 
 	//mongoose
 	//para evitar alguns erros mongoose
@@ -73,10 +83,21 @@
 
 //ROTAS
 
-// ROTA DE LOGIN
+	// ROTA DE LOGIN
 	app.get('/',(req, res) => {
 		 res.render('login');
 	}); 
+
+	//rota para a autenticação
+	app.post('/login', (req, res, next) => {
+		passport.authenticate('local', {
+			//se passou na autenticação
+			successRedirect: '/listCarros',
+			//se não passou na autenticação
+			failureRedirect: '/',
+			failureFlash: true 
+		})(req, res, next)
+	})
 
 	//ROTA DE LISTA DE CARROS
 	app.get('/listCarros', (req, res) => {
@@ -87,6 +108,7 @@
 		})
 	});
 
+	//ROTA DE INFORMAÇÕES DE UM CARRO
 	app.get('/infoCarros/:id', (req, res) => {
 		Carro.findOne({_id:req.params.id}).then((carros) => {
 			res.render('infoCarros', {carros: carros});
@@ -96,9 +118,50 @@
 		})
 	});
 
-	app.get('/alugarCarros', function(req, res){
-		res.render('alugarCarros');
+	//ROTA DE ALUGAR CARROS
+	app.get('/alugarCarros/:id', function(req, res){
+		Carro.findOne({_id:req.params.id}).then((carros) => {
+			res.render('alugarCarros', {carros: carros});
+		}).catch((err) => {
+			req.flash('error_msg', 'Houve um erro ao exibir as informações');
+			res.render('infoCarros');
+		})
 	});
+
+	//ROTA PARA RESERVAR CARRO
+	app.post('/resCarros', (req, res) => {
+		Carro.findOne({_id:req.body.id}).then((carros) => {
+
+			carros.reserva = "1";
+			carros.reserva = 1;
+			carros.reserva = req.body.reserva;
+
+			carros.save().then(() => {
+				req.flash('success_msg', 'Carro reservado com sucesso!');
+				res.redirect('resCarros');
+			}).catch((err) => {
+				req.flash('error_msg', 'Houve um erro ao reservar o carro');
+				res.redirect('alugarCarros');
+
+			})
+
+			
+		}).catch((err) => {
+			console.log('Houve um erro ao reservar o carro' + err);
+			req.flash('error_msg', 'Houve um erro ao reservar o carro');
+				res.render('infoCarros');
+		})
+	})
+
+	// app.get('/pesquisar/:cor', (req, res) => {
+	// 	Carro.findOne({cor:req.params.cor}).then((carros) => {
+	// 		res.render('listCarros', {carros: carros});
+	// 	}).catch((err) => {
+	// 		req.flash('error_msg', 'Cor não encontrada');
+	// 			res.render('listCarros');
+	// 	})
+	// });
+	
 
 	//ROTA DO FORMULARIO DE CLIENTES
 	app.get('/cadClientes', (req, res) =>{
@@ -151,16 +214,28 @@
 		const telefoneE = telefoneP2.replace(")", "");
 		const telefone = telefoneE.replace(" ", "");
 
-		const novoCliente = {
+		const novoCliente = new Cliente({
 			nome: req.body.nome,
 			cpf: cpf,
 			email: req.body.email,
 			telefone: telefone,
 			senha: req.body.senha,
 			dataNasc: req.body.dataNasc
-		}
+		})
 
-		new Cliente(novoCliente).save().then(() =>{
+		bcrypt.genSalt(10, (erro, salt) => {
+			bcrypt.hash(novoCliente.senha, salt, (erro, hash) => {
+				if(erro){
+					req.flash('error_msg', 'Houve um erro ao salvar o cliente')
+					res.redirect('cadClientes')
+				}
+				novoCliente.senha = hash
+			})
+
+		})
+		
+
+		novoCliente.save().then(() =>{
 			req.flash('success_msg', 'Cliente cadastrado com suceso!')
 			res.redirect('/')
 		}).catch((err) => {
@@ -177,6 +252,3 @@
 		console.log("Servidor Rodando na porta 8080! ");
 	});
 
-	// app.get('/resCarros', function(req, res){
-	// 	res.sendFile(__dirname + '/views/resCarros.html');
-	// });
