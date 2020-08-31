@@ -49,14 +49,16 @@
           <form method="POST" action="/resCarros">
 
           <input type="hidden" name="_id"   value="{{_id}}">
-          <input type="text" name="reserva" id="reserva"   value="1">
+          {{!-- <input type="text" name="reserva" id="reserva"   value="1"> --}}
 				</div>
       		</div>
         
       <div class=" col-12 mt-3 pb-5">
-        <button type="submit" class="btn btn-success float-right px-5 text-uppercase">Reservar</button> 
-      </div>
+        <button type="submit" class="btn btn-success float-right px-5 text-uppercase">Reservar</button>
       </form>
+        <a href="/calAluguel" class="btn btn-success float-right px-5 mr-4 text-uppercase">Calcular</a> 
+        {{!-- <a href="/calAluguel" class="btn btn-success float-right px-5 mr-4 text-uppercase" value="{{total}}">Calcular</a>  --}}
+      </div>
    </div>
    {{else}}
      <h3 class="text-center">Sem Informações para Calcular Aluguel</h3>

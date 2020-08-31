@@ -100,8 +100,8 @@
 	})
 
 	//ROTA DE LISTA DE CARROS
-	app.get('/listCarros', (req, res) => {
-		Carro.find().lean().then((carros) => {
+	app.get('/listCarros', (req, res) => {	
+		Carro.find().lean().limit(7).skip(7).sort({preco: 1}).then((carros) => {
 			res.render('listCarros', {carros: carros});
 		}).catch((err) => {
 			req.flash('error_msg', 'Houve um erro ao listar os carros');
@@ -128,30 +128,41 @@
 		})
 	});
 
+	//ROTA DE CALCULAR ALUGAUEL DE CARROS
+	// app.get('/calAlguel', function(req, res){
+	// 	Carro.findOne({_id:req.params.id}).then((carros) => {
+	// 		const preco = (req.body.preco);
+	// 		const dias = (req.body.dias);
+	// 		const total = preco * dias;
+	// 		res.render('alugarCarros', {carros: carros});
+
+	// 	})
+	// });
+
 	//ROTA PARA RESERVAR CARRO
-	app.post('/resCarros', (req, res) => {
-		Carro.findOne({_id:req.body.id}).then((carros) => {
+	// app.post('/resCarros', (req, res) => {
+	// 	Carro.findOne({_id:req.body.id}).then((carros) => {
 
-			carros.reserva = "1";
-			carros.reserva = 1;
-			carros.reserva = req.body.reserva;
+	// 		carros.reserva = "1";
+	// 		carros.reserva = 1;
+	// 		carros.reserva = req.body.reserva;
 
-			carros.save().then(() => {
-				req.flash('success_msg', 'Carro reservado com sucesso!');
-				res.redirect('resCarros');
-			}).catch((err) => {
-				req.flash('error_msg', 'Houve um erro ao reservar o carro');
-				res.redirect('alugarCarros');
+	// 		carros.save().then(() => {
+	// 			req.flash('success_msg', 'Carro reservado com sucesso!');
+	// 			res.redirect('resCarros');
+	// 		}).catch((err) => {
+	// 			req.flash('error_msg', 'Houve um erro ao reservar o carro');
+	// 			res.redirect('alugarCarros');
 
-			})
+	// 		})
 
 			
-		}).catch((err) => {
-			console.log('Houve um erro ao reservar o carro' + err);
-			req.flash('error_msg', 'Houve um erro ao reservar o carro');
-				res.render('infoCarros');
-		})
-	})
+	// 	}).catch((err) => {
+	// 		console.log('Houve um erro ao reservar o carro ' + err);
+	// 		req.flash('error_msg', 'Houve um erro ao reservar o carro');
+	// 			res.render('infoCarros');
+	// 	})
+	// })
 
 	// app.get('/pesquisar/:cor', (req, res) => {
 	// 	Carro.findOne({cor:req.params.cor}).then((carros) => {
